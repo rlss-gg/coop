@@ -1,0 +1,31 @@
+{
+  "name": "coop",
+  "version": "1.0.0",
+  "description": "A Discord bot to handle co-operative RL Sideswipe community moderation",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "ts-node-dev --respawn src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rlss-gg/coop.git"
+  },
+  "author": "FinOCE",
+  "bugs": {
+    "url": "https://github.com/rlss-gg/coop/issues"
+  },
+  "homepage": "https://github.com/rlss-gg/coop#readme",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.7.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "discord.js": "^14.13.0",
+    "dotenv": "^16.3.1",
+    "sqlite3": "^5.1.6"
+  }
+}
