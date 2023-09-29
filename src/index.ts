@@ -18,7 +18,8 @@ const client = new ClientBuilder(configuration, logger)
   .useGatewayIntentBits(
     GatewayIntentBits.GuildModeration,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.Guilds
   )
   .addEvent(MessageLogger)
   .build()

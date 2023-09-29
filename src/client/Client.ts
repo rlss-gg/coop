@@ -18,13 +18,16 @@ export default class Client {
     this._logger = logger
     this._djsClient = djsClient
 
-    Object.entries(events).forEach(([name, events]) =>
+    Object.entries(events).forEach(([name, events]) => {
+      const list = ["", ...events.map(event => `- ${event.name}`)].join("\r\n")
+      this._logger.log("INFO", `Configuring ${name} events: ${list}`)
+
       events.forEach(event =>
         this._djsClient[event.type](name, (...args: any[]) =>
           event.handle(this, ...args)
         )
       )
-    )
+    })
   }
 
   public start(

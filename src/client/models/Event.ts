@@ -8,13 +8,11 @@ export default abstract class Event {
   protected readonly _configuration: IConfiguration
   protected readonly _logger: ILogger
 
+  public abstract readonly name: string
   public abstract readonly type: EventTypes.Type
   public abstract readonly event: Events
 
-  public constructor(
-    configuration: IConfiguration,
-    logger: ILogger
-  ) {
+  public constructor(configuration: IConfiguration, logger: ILogger) {
     this._configuration = configuration
     this._logger = logger
   }
