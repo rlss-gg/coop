@@ -2,8 +2,11 @@ import IConfiguration from "../configuration/IConfiguration"
 import ILogger from "../logger/ILogger"
 import Client from "./Client"
 import { Client as DjsClient, GatewayIntentBits } from "discord.js"
-import Event from "./models/Event"
+import Event from "./handlers/Event"
 import { EventTypes } from "../types/EventTypes"
+import TextCommand from "./handlers/TextCommand"
+import { TextCommandTypes } from "../types/TextCommandTypes"
+import DuplicateKeyError from "../errors/DuplicateKeyError"
 
 export default class ClientBuilder {
   private readonly _configuration: IConfiguration
@@ -11,6 +14,7 @@ export default class ClientBuilder {
 
   public readonly gatewayIntentBits: GatewayIntentBits[] = []
   public readonly events: EventTypes.Collection = {}
+  public readonly textCommands: TextCommandTypes.Collection = {}
 
   public constructor(configuration: IConfiguration, logger: ILogger) {
     this._configuration = configuration
@@ -43,8 +47,31 @@ export default class ClientBuilder {
     return this
   }
 
+  public addTextCommand<T extends TextCommand>(
+    ctor: TextCommandTypes.Constructor<T>
+  ): ClientBuilder {
+    const command = new ctor(this._configuration, this._logger)
+    if (this.textCommands[command.name])
+      throw new DuplicateKeyError(command.name)
+    this.textCommands[command.name] = command
+    return this
+  }
+
+  public addTextCommands<T extends TextCommand>(
+    ...ctors: TextCommandTypes.Constructor<T>[]
+  ): ClientBuilder {
+    ctors.forEach(textCommand => this.addTextCommand(textCommand))
+    return this
+  }
+
   public build(): Client {
     const djsClient = new DjsClient({ intents: this.gatewayIntentBits })
-    return new Client(this._configuration, this._logger, djsClient, this.events)
+    return new Client(
+      this._configuration,
+      this._logger,
+      djsClient,
+      this.events,
+      this.textCommands
+    )
   }
 }

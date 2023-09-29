@@ -2,6 +2,7 @@ import { Client as DjsClient, Events } from "discord.js"
 import IConfiguration from "../configuration/IConfiguration"
 import ILogger from "../logger/ILogger"
 import { EventTypes } from "../types/EventTypes"
+import { TextCommandTypes } from "../types/TextCommandTypes"
 
 export default class Client {
   private readonly _configuration: IConfiguration
@@ -12,12 +13,15 @@ export default class Client {
     configuration: IConfiguration,
     logger: ILogger,
     djsClient: DjsClient,
-    events: EventTypes.Collection
+    events: EventTypes.Collection,
+    textCommands: TextCommandTypes.Collection
   ) {
+    // Setup dependencies
     this._configuration = configuration
     this._logger = logger
     this._djsClient = djsClient
 
+    // Setup events
     Object.entries(events).forEach(([name, events]) => {
       const list = ["", ...events.map(event => `- ${event.name}`)].join("\r\n")
       this._logger.log("DEBUG", `Configuring ${name} events: ${list}`)
@@ -27,6 +31,26 @@ export default class Client {
           event.handle(this, ...args)
         )
       )
+    })
+
+    // Setup text commands
+    const prefix = this._configuration.get("TEXT_COMMAND_PREFIX")
+    this._logger.log("DEBUG", `Setup text commands using the prefix: ${prefix}`)
+
+    {
+      const commands = Object.keys(textCommands)
+      const list = ["", ...commands.map(name => `- ${name}`)].join("\r\n")
+      this._logger.log("DEBUG", `Configuring text commands: ${list}`)
+    }
+
+    this._djsClient.on(Events.MessageCreate, message => {
+      const name = Object.keys(textCommands).find(
+        name =>
+          message.content.split(" ")[0].toLowerCase() ===
+          prefix + name.toLowerCase()
+      )
+
+      if (name) textCommands[name].handle(this, message)
     })
   }
 

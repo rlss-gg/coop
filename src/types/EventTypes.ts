@@ -1,5 +1,5 @@
 import { Events } from "discord.js"
-import Event from "../client/models/Event"
+import Event from "../client/handlers/Event"
 import IConfiguration from "../configuration/IConfiguration"
 import ILogger from "../logger/ILogger"
 
