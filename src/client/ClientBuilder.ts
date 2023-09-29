@@ -17,10 +17,13 @@ export default class ClientBuilder {
     this._logger = logger
   }
 
-  public useGatewayIntentBits(
-    ...gatewayIntentBits: GatewayIntentBits[]
-  ): ClientBuilder {
-    gatewayIntentBits.forEach(bit => this.gatewayIntentBits.push(bit))
+  public useGatewayIntentBit(bit: GatewayIntentBits): ClientBuilder {
+    this.gatewayIntentBits.push(bit)
+    return this
+  }
+
+  public useGatewayIntentBits(...bits: GatewayIntentBits[]): ClientBuilder {
+    bits.forEach(bit => this.useGatewayIntentBit(bit))
     return this
   }
 
@@ -33,9 +36,15 @@ export default class ClientBuilder {
     return this
   }
 
+  public addEvents<T extends Event>(
+    ...ctors: EventTypes.Constructor<T>[]
+  ): ClientBuilder {
+    ctors.forEach(event => this.addEvent(event))
+    return this
+  }
+
   public build(): Client {
     const djsClient = new DjsClient({ intents: this.gatewayIntentBits })
-
     return new Client(this._configuration, this._logger, djsClient, this.events)
   }
 }
