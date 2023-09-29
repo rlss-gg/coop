@@ -30,5 +30,5 @@ const client = new ClientBuilder(configuration, logger)
 
 // Start client
 client.start((client, configuration, logger) =>
-  logger.log("INFO", `${client.user.username} is now online`)
+  logger.log("DEBUG", `${client.user.username} is now online`)
 )

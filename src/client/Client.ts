@@ -20,7 +20,7 @@ export default class Client {
 
     Object.entries(events).forEach(([name, events]) => {
       const list = ["", ...events.map(event => `- ${event.name}`)].join("\r\n")
-      this._logger.log("INFO", `Configuring ${name} events: ${list}`)
+      this._logger.log("DEBUG", `Configuring ${name} events: ${list}`)
 
       events.forEach(event =>
         this._djsClient[event.type](name, (...args: any[]) =>
