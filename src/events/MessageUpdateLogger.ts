@@ -25,8 +25,8 @@ export default class MessageUpdateLogger extends Event {
     newMessage: Message
   ): Promise<void> {
     // Get log channel
-    const guildId = this._configuration.get("LOG_GUILD_ID")
-    const channelId = this._configuration.get("LOG_CHANNEL_ID")
+    const guildId = this._configuration.get("log.guildId")
+    const channelId = this._configuration.get("log.channelId")
 
     const guild = await oldMessage.client.guilds.fetch(guildId)
     if (!guild) throw new GuildNotFoundError(guildId)

@@ -1,19 +1,15 @@
 import { GatewayIntentBits } from "discord.js"
 import ConsoleLogger from "./logger/ConsoleLogger"
-import DotEnvConfigurationBuilder from "./configuration/DotEnvConfigurationBuilder"
+import ConfigurationBuilder from "./configuration/ConfigurationBuilder"
 import ClientBuilder from "./client/ClientBuilder"
 import MessageDeleteLogger from "./events/MessageDeleteLogger"
 import MessageUpdateLogger from "./events/MessageUpdateLogger"
-import Ping from "./textCommands/ping"
+import Ping from "./textCommands/Ping"
 
 // Setup dependencies
-const configuration = new DotEnvConfigurationBuilder()
-  .useDotEnv(() => ({
-    DISCORD_BOT_TOKEN: process.env.DISCORD_BOT_TOKEN,
-    LOG_CHANNEL_ID: process.env.LOG_CHANNEL_ID,
-    LOG_GUILD_ID: process.env.LOG_GUILD_ID,
-    TEXT_COMMAND_PREFIX: process.env.TEXT_COMMAND_PREFIX
-  }))
+const configuration = new ConfigurationBuilder()
+  .loadDotEnv("DISCORD_BOT_TOKEN")
+  .loadJson("config.json")
   .build()
 
 const logger = new ConsoleLogger()

@@ -34,7 +34,7 @@ export default class Client {
     })
 
     // Setup text commands
-    const prefix = this._configuration.get("TEXT_COMMAND_PREFIX")
+    const prefix = this._configuration.get("prefix")
     this._logger.log("DEBUG", `Setup text commands using the prefix: ${prefix}`)
 
     {
