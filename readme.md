@@ -1,3 +1,5 @@
+![RLSS Keyart](https://3k4812ts.media.zestyio.com/RLS_KeyArt_Primary_Horiz_RGB_4K.jpg)
+
 # RLSS Cooperative
 
 The RLSS Cooperative (NoToRa Coop) is a group of RL Sideswipe Discord server owners and moderators who work together to promote positivity in the game's community. By working together, helping each other out, and handling server punishments across several large servers, the coop makes sure that toxicity, racism, homophobia, and other undesirable traits do not receive a platform.
@@ -8,7 +10,7 @@ This bot is developed to make these cross-server punishments easier. It does thi
 
 This bot uses both a `config.json` and `.env` to store configuration values. Public values are stored in JSON since they don't need to be hidden, but anything secure is not included in version control. In order to run the app as intended, `config.json` should be modified to fit the new implementation, as the default values are configured for the first-party use of this bot. The `.env` value will need to be created separately and can be done so off the following template:
 
-```
+```sh
 DISCORD_BOT_TOKEN="YOUR_TOKEN_HERE"
 ```
 
