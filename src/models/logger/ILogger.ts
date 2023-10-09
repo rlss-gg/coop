@@ -1,4 +1,4 @@
-import { ILoggerTypes } from "../types/ILoggerTypes"
+import { ILoggerTypes } from "../../types/ILoggerTypes"
 
 export default interface ILogger {
   /**

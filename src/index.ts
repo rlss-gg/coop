@@ -1,10 +1,11 @@
 import { GatewayIntentBits } from "discord.js"
-import ConsoleLogger from "./logger/ConsoleLogger"
-import ConfigurationBuilder from "./configuration/ConfigurationBuilder"
-import ClientBuilder from "./client/ClientBuilder"
-import MessageDeleteLogger from "./events/MessageDeleteLogger"
-import MessageUpdateLogger from "./events/MessageUpdateLogger"
-import Ping from "./textCommands/Ping"
+import ConfigurationBuilder from "./builders/configuration/ConfigurationBuilder"
+import ClientBuilder from "./builders/discord/DiscordClientBuilder"
+import MessageDeleteLogger from "./handlers/events/MessageDeleteLogger"
+import MessageUpdateLogger from "./handlers/events/MessageUpdateLogger"
+import Ping from "./handlers/textCommands/Ping"
+import PrismaClientFactory from "./factories/database/PrismaClientFactory"
+import ConsoleLoggerFactory from "./factories/logger/ConsoleLoggerFactory"
 
 // Setup dependencies
 const configuration = new ConfigurationBuilder()
@@ -12,10 +13,16 @@ const configuration = new ConfigurationBuilder()
   .loadJson("config.json")
   .build()
 
-const logger = new ConsoleLogger()
+const loggerFactory = new ConsoleLoggerFactory()
+
+const prismaClientFactory = new PrismaClientFactory()
 
 // Create client and configure events
-const client = new ClientBuilder(configuration, logger)
+const client = new ClientBuilder(
+  configuration,
+  loggerFactory,
+  prismaClientFactory
+)
   .useGatewayIntentBits(
     GatewayIntentBits.GuildModeration,
     GatewayIntentBits.GuildMessages,

@@ -1,7 +1,7 @@
 import { Events } from "discord.js"
-import Event from "../client/handlers/Event"
-import IConfiguration from "../configuration/IConfiguration"
-import ILogger from "../logger/ILogger"
+import Event from "../models/handlers/Event"
+import IConfiguration from "../models/configuration/IConfiguration"
+import ILogger from "../models/logger/ILogger"
 
 export namespace EventTypes {
   export type Collection = { [K in Events]?: Event[] }

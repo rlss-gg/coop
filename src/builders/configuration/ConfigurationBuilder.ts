@@ -1,13 +1,12 @@
-import DuplicateKeyError from "../errors/DuplicateKeyError"
-import Configuration from "./Configuration"
-import IConfiguration from "./IConfiguration"
+import DuplicateKeyError from "../../errors/DuplicateKeyError"
+import Configuration from "../../models/configuration/Configuration"
+import IConfiguration from "../../models/configuration/IConfiguration"
 import IConfigurationBuilder from "./IConfigurationBuilder"
 import { configDotenv } from "dotenv"
-import InvalidKeyError from "../errors/InvalidKeyError"
-import fs from 'fs'
+import InvalidKeyError from "../../errors/InvalidKeyError"
+import fs from "fs"
 
-export default class ConfigurationBuilder implements IConfigurationBuilder
-{
+export default class ConfigurationBuilder implements IConfigurationBuilder {
   protected readonly _store: Record<string, string> = {}
 
   public add(key: string, value: string): IConfigurationBuilder {
@@ -34,12 +33,13 @@ export default class ConfigurationBuilder implements IConfigurationBuilder
         case "object":
           if (data && !Array.isArray(data))
             Object.entries(data).forEach(([key, value]) =>
-              recursivelyAdd(value, [...parents, key]))
+              recursivelyAdd(value, [...parents, key])
+            )
           break
         case "string":
         case "number":
         case "boolean":
-          this.add(parents.join('.'), String(data))
+          this.add(parents.join("."), String(data))
           break
       }
     }

@@ -1,17 +1,20 @@
+import { PrismaClient } from "@prisma/client"
 import { Client as DjsClient, Events } from "discord.js"
-import IConfiguration from "../configuration/IConfiguration"
-import ILogger from "../logger/ILogger"
-import { EventTypes } from "../types/EventTypes"
-import { TextCommandTypes } from "../types/TextCommandTypes"
+import IConfiguration from "../../models/configuration/IConfiguration"
+import ILogger from "../../models/logger/ILogger"
+import { EventTypes } from "../../types/EventTypes"
+import { TextCommandTypes } from "../../types/TextCommandTypes"
 
-export default class Client {
+export default class DiscordClient {
   private readonly _configuration: IConfiguration
   private readonly _logger: ILogger
+  private readonly _prismaClient: PrismaClient
   private readonly _djsClient: DjsClient<true>
 
   public constructor(
     configuration: IConfiguration,
     logger: ILogger,
+    prismaClient: PrismaClient,
     djsClient: DjsClient,
     events: EventTypes.Collection,
     textCommands: TextCommandTypes.Collection
@@ -19,6 +22,7 @@ export default class Client {
     // Setup dependencies
     this._configuration = configuration
     this._logger = logger
+    this._prismaClient = prismaClient
     this._djsClient = djsClient
 
     // Setup events
@@ -28,7 +32,7 @@ export default class Client {
 
       events.forEach(event =>
         this._djsClient[event.type](name, (...args: any[]) =>
-          event.handle(this, ...args)
+          event.handle(this, this._prismaClient, ...args)
         )
       )
     })
@@ -50,7 +54,7 @@ export default class Client {
           prefix + name.toLowerCase()
       )
 
-      if (name) textCommands[name].handle(this, message)
+      if (name) textCommands[name].handle(this, this._prismaClient, message)
     })
   }
 

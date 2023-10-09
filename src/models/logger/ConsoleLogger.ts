@@ -1,4 +1,4 @@
-import { ILoggerTypes } from "../types/ILoggerTypes"
+import { ILoggerTypes } from "../../types/ILoggerTypes"
 import ILogger from "./ILogger"
 
 export default class ConsoleLogger implements ILogger {

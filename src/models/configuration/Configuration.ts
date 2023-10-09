@@ -1,4 +1,4 @@
-import InvalidKeyError from "../errors/InvalidKeyError"
+import InvalidKeyError from "../../errors/InvalidKeyError"
 import IConfiguration from "./IConfiguration"
 
 export default class Configuration implements IConfiguration {

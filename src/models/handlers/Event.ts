@@ -1,9 +1,10 @@
-import IConfiguration from "../../configuration/IConfiguration"
-import ILogger from "../../logger/ILogger"
+import IConfiguration from "../../models/configuration/IConfiguration"
+import ILogger from "../../models/logger/ILogger"
 import { EventTypes } from "../../types/EventTypes"
-import Client from "../Client"
+import DiscordClient from "../../clients/discord/DiscordClient"
 import { Events } from "discord.js"
 import IHandler from "./IHandler"
+import { PrismaClient } from "@prisma/client"
 
 export default abstract class Event implements IHandler {
   protected readonly _configuration: IConfiguration
@@ -18,5 +19,9 @@ export default abstract class Event implements IHandler {
     this._logger = logger
   }
 
-  public abstract handle(client: Client, ...args: any[]): Promise<void>
+  public abstract handle(
+    discordClient: DiscordClient,
+    prismaClient: PrismaClient,
+    ...args: any[]
+  ): Promise<void>
 }

@@ -1,14 +1,15 @@
-import Client from "../client/Client"
-import Event from "../client/handlers/Event"
-import IConfiguration from "../configuration/IConfiguration"
-import ILogger from "../logger/ILogger"
+import DiscordClient from "../../clients/discord/DiscordClient"
+import Event from "../../models/handlers/Event"
+import IConfiguration from "../../models/configuration/IConfiguration"
+import ILogger from "../../models/logger/ILogger"
 import { Events, Message } from "discord.js"
-import { EventTypes } from "../types/EventTypes"
-import GuildNotFoundError from "../errors/GuildNotFoundError"
-import ChannelNotFoundError from "../errors/ChannelNotFoundError"
-import WrongChannelTypeError from "../errors/WrongChannelTypeError"
-import sendInOrder from "../utils/sendInOrder"
-import userString from "../utils/userString"
+import { EventTypes } from "../../types/EventTypes"
+import GuildNotFoundError from "../../errors/GuildNotFoundError"
+import ChannelNotFoundError from "../../errors/ChannelNotFoundError"
+import WrongChannelTypeError from "../../errors/WrongChannelTypeError"
+import sendInOrder from "../../utils/sendInOrder"
+import userString from "../../utils/userString"
+import { PrismaClient } from "@prisma/client"
 
 export default class MessageUpdateLogger extends Event {
   public override readonly name: string = "MessageUpdateLogger"
@@ -20,7 +21,8 @@ export default class MessageUpdateLogger extends Event {
   }
 
   public override async handle(
-    client: Client,
+    client: DiscordClient,
+    prismaClient: PrismaClient,
     oldMessage: Message,
     newMessage: Message
   ): Promise<void> {

@@ -1,8 +1,9 @@
 import { Message } from "discord.js"
-import IConfiguration from "../../configuration/IConfiguration"
-import ILogger from "../../logger/ILogger"
-import Client from "../Client"
+import IConfiguration from "../../models/configuration/IConfiguration"
+import ILogger from "../../models/logger/ILogger"
+import DiscordClient from "../../clients/discord/DiscordClient"
 import IHandler from "./IHandler"
+import { PrismaClient } from "@prisma/client"
 
 export default abstract class TextCommand implements IHandler {
   protected readonly _configuration: IConfiguration
@@ -15,5 +16,9 @@ export default abstract class TextCommand implements IHandler {
     this._logger = logger
   }
 
-  public abstract handle(client: Client, message: Message): Promise<void>
+  public abstract handle(
+    client: DiscordClient,
+    prismaClient: PrismaClient,
+    message: Message
+  ): Promise<void>
 }

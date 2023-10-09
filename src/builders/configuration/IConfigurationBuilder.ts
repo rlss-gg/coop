@@ -1,4 +1,4 @@
-import IConfiguration from "./IConfiguration"
+import IConfiguration from "../../models/configuration/IConfiguration"
 
 export default interface IConfigurationBuilder {
   /**
