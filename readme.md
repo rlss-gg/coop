@@ -1,14 +1,12 @@
 ![RLSS Keyart](https://3k4812ts.media.zestyio.com/RLS_KeyArt_Primary_Horiz_RGB_4K.jpg)
 
-# RLSS Cooperative
+# Rainmaker
 
-The RLSS Cooperative (NoToRa Coop) is a group of RL Sideswipe Discord server owners and moderators who work together to promote positivity in the game's community. By working together, helping each other out, and handling server punishments across several large servers, the coop makes sure that toxicity, racism, homophobia, and other undesirable traits do not receive a platform.
-
-This bot is developed to make these cross-server punishments easier. It does this by handling bans and other punishments automatically across all servers when triggered in only one. Rather than needing to ban the user manually on all servers, this automates the process and greatly improves efficiency and ease of use, ensuring the objectives of NoToRa Coop are successful.
+Rainmaker is a bot made to handle cross-server moderation for RL Sideswipe servers. It does this by propagating bans and other punishments automatically across all servers when triggered by one. Rainmaker is available for any server, however only approved servers can trigger propagated punishments.
 
 ## Configuration
 
-This bot uses both a `config.json` and `.env` to store configuration values. Public values are stored in JSON since they don't need to be hidden, but anything secure is not included in version control. In order to run the app as intended, `config.json` should be modified to fit the new implementation, as the default values are configured for the first-party use of this bot. The `.env` value will need to be created separately and can be done so off the following template:
+This bot uses both a `config.json` and `.env` to store configuration values. Public values are stored in JSON since they don't need to be hidden, but anything secure is not included in version control. In order to run the app as intended, `config.json` should be modified to fit the new implementation, as the default values are configured for the first-party use of this bot. The `.env` file will need to be created separately and can be done so off the following template:
 
 ```sh
 DISCORD_BOT_TOKEN="YOUR_TOKEN_HERE"
