@@ -1,5 +1,5 @@
 {
-  "name": "coop",
+  "name": "rainmaker",
   "version": "1.0.0",
   "description": "A Discord bot to handle co-operative RL Sideswipe community moderation",
   "main": "src/index.ts",

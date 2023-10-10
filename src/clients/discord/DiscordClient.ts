@@ -1,9 +1,10 @@
 import { PrismaClient } from "@prisma/client"
-import { Client as DjsClient, Events } from "discord.js"
+import { Client as DjsClient } from "discord.js"
 import IConfiguration from "../../models/configuration/IConfiguration"
 import ILogger from "../../models/logger/ILogger"
-import { EventTypes } from "../../types/EventTypes"
-import { TextCommandTypes } from "../../types/TextCommandTypes"
+import { HandlerTypes } from "../../types/HandlerTypes"
+import ITextCommandHandler from "../../models/handlers/ITextCommandHandler"
+import DuplicateKeyError from "../../errors/DuplicateKeyError"
 
 export default class DiscordClient {
   private readonly _configuration: IConfiguration
@@ -16,8 +17,7 @@ export default class DiscordClient {
     logger: ILogger,
     prismaClient: PrismaClient,
     djsClient: DjsClient,
-    events: EventTypes.Collection,
-    textCommands: TextCommandTypes.Collection
+    handlers: HandlerTypes.Collection
   ) {
     // Setup dependencies
     this._configuration = configuration
@@ -25,36 +25,91 @@ export default class DiscordClient {
     this._prismaClient = prismaClient
     this._djsClient = djsClient
 
-    // Setup events
-    Object.entries(events).forEach(([name, events]) => {
-      const list = ["", ...events.map(event => `- ${event.name}`)].join("\r\n")
-      this._logger.log("DEBUG", `Configuring ${name} events: ${list}`)
-
-      events.forEach(event =>
-        this._djsClient[event.type](name, (...args: any[]) =>
-          event.handle(this, this._prismaClient, ...args)
-        )
-      )
-    })
-
-    // Setup text commands
+    // Get prefix from configuration
     const prefix = this._configuration.get("prefix")
     this._logger.log("DEBUG", `Setup text commands using the prefix: ${prefix}`)
 
-    {
-      const commands = Object.keys(textCommands)
-      const list = ["", ...commands.map(name => `- ${name}`)].join("\r\n")
-      this._logger.log("DEBUG", `Configuring text commands: ${list}`)
-    }
+    // Setup handlers
+    const textCommands: Record<string, ITextCommandHandler> = {}
 
-    this._djsClient.on(Events.MessageCreate, message => {
-      const name = Object.keys(textCommands).find(
-        name =>
-          message.content.split(" ")[0].toLowerCase() ===
-          prefix + name.toLowerCase()
+    Object.entries(handlers).forEach(([name, handler]) => {
+      const types: string[] = []
+
+      // Setup events
+      if (handler.isEventHandler()) {
+        this._djsClient[handler.eventDetails.occurrance](
+          handler.eventDetails.name,
+          async (...args: any[]) =>
+            await handler.event(this, this._prismaClient, ...args)
+        )
+
+        types.push("Event: " + handler.eventDetails.name)
+      }
+
+      if (handler.isTextCommandHandler()) {
+        if (textCommands[handler.textDetails.name])
+          throw new DuplicateKeyError(name)
+        textCommands[handler.textDetails.name] = handler
+
+        types.push("Text Command")
+      }
+
+      if (handler.isSlashCommandHandler()) {
+        // TODO
+
+        types.push("Slash Command")
+      }
+
+      if (handler.isButtonHandler()) {
+        // TODO
+
+        types.push("Button")
+      }
+
+      if (handler.isSelectMenuHandler()) {
+        // TODO
+
+        types.push("Select Menu")
+      }
+
+      if (handler.isUserContextHandler()) {
+        // TODO
+
+        types.push("User Context")
+      }
+
+      if (handler.isMessageContextHandler()) {
+        // TODO
+
+        types.push("Message Context")
+      }
+
+      if (handler.isModalHandler()) {
+        // TODO
+
+        types.push("Modal")
+      }
+
+      // Log configured handlers
+      const list = ["", ...types.map(type => `- ${type}`)].join("\r\n")
+      this._logger.log("DEBUG", `Configured handler ${name}: ${list}`)
+    })
+
+    // Create event to handle text commands
+    this._djsClient.on("messageCreate", async message => {
+      const args = message.content.trim().split(" ")
+      const command = args[0].substring(1, args[0].length)
+
+      if (
+        args[0].startsWith("!") &&
+        Object.keys(textCommands).includes(command)
       )
-
-      if (name) textCommands[name].handle(this, this._prismaClient, message)
+        await textCommands[command].text(
+          this,
+          this._prismaClient,
+          message,
+          ...args.slice(1)
+        )
     })
   }
 
@@ -65,7 +120,7 @@ export default class DiscordClient {
       logger: ILogger
     ) => void
   ): void {
-    this._djsClient.once(Events.ClientReady, (client: DjsClient<true>) =>
+    this._djsClient.once("ready", (client: DjsClient<true>) =>
       callback(client, this._configuration, this._logger)
     )
 

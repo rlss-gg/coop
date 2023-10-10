@@ -1,11 +1,11 @@
 import { GatewayIntentBits } from "discord.js"
 import ConfigurationBuilder from "./builders/configuration/ConfigurationBuilder"
-import ClientBuilder from "./builders/discord/DiscordClientBuilder"
-import MessageDeleteLogger from "./handlers/events/MessageDeleteLogger"
-import MessageUpdateLogger from "./handlers/events/MessageUpdateLogger"
-import Ping from "./handlers/textCommands/Ping"
+import DiscordClientBuilder from "./builders/discord/DiscordClientBuilder"
 import PrismaClientFactory from "./factories/database/PrismaClientFactory"
 import ConsoleLoggerFactory from "./factories/logger/ConsoleLoggerFactory"
+import MessageDeleteLogger from "./handlers/MessageDeleteLogger"
+import MessageUpdateLogger from "./handlers/MessageUpdateLogger"
+import PingCommand from "./handlers/PingCommand"
 
 // Setup dependencies
 const configuration = new ConfigurationBuilder()
@@ -18,7 +18,7 @@ const loggerFactory = new ConsoleLoggerFactory()
 const prismaClientFactory = new PrismaClientFactory()
 
 // Create client and configure events
-const client = new ClientBuilder(
+const client = new DiscordClientBuilder(
   configuration,
   loggerFactory,
   prismaClientFactory
@@ -29,9 +29,9 @@ const client = new ClientBuilder(
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.Guilds
   )
-  .addEvent(MessageDeleteLogger)
-  .addEvent(MessageUpdateLogger)
-  .addTextCommand(Ping)
+  .addHandler(MessageDeleteLogger)
+  .addHandler(MessageUpdateLogger)
+  .addHandler(PingCommand)
   .build()
 
 // Start client

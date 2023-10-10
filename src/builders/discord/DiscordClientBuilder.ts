@@ -1,13 +1,10 @@
 import IConfiguration from "../../models/configuration/IConfiguration"
 import DiscordClient from "../../clients/discord/DiscordClient"
 import { Client as DjsClient, GatewayIntentBits } from "discord.js"
-import Event from "../../models/handlers/Event"
-import { EventTypes } from "../../types/EventTypes"
-import TextCommand from "../../models/handlers/TextCommand"
-import { TextCommandTypes } from "../../types/TextCommandTypes"
 import DuplicateKeyError from "../../errors/DuplicateKeyError"
 import PrismaClientFactory from "../../factories/database/PrismaClientFactory"
 import ILoggerFactory from "../../factories/logger/ILoggerFactory"
+import { HandlerTypes } from "../../types/HandlerTypes"
 
 export default class DiscordClientBuilder {
   private readonly _configuration: IConfiguration
@@ -15,8 +12,7 @@ export default class DiscordClientBuilder {
   private readonly _prismaClientFactory: PrismaClientFactory
 
   public readonly gatewayIntentBits: GatewayIntentBits[] = []
-  public readonly events: EventTypes.Collection = {}
-  public readonly textCommands: TextCommandTypes.Collection = {}
+  public readonly handlers: HandlerTypes.Collection = {}
 
   public constructor(
     configuration: IConfiguration,
@@ -40,42 +36,15 @@ export default class DiscordClientBuilder {
     return this
   }
 
-  public addEvent<T extends Event>(
-    ctor: EventTypes.Constructor<T>
-  ): DiscordClientBuilder {
-    const event = new ctor(
+  public addHandler(ctor: HandlerTypes.Constructor): DiscordClientBuilder {
+    const handler = new ctor(
       this._configuration,
       this._loggerFactory.createLogger()
     )
-    if (!this.events[event.event]) this.events[event.event] = []
-    this.events[event.event]!.push(event)
-    return this
-  }
 
-  public addEvents<T extends Event>(
-    ...ctors: EventTypes.Constructor<T>[]
-  ): DiscordClientBuilder {
-    ctors.forEach(event => this.addEvent(event))
-    return this
-  }
+    if (this.handlers[handler.name]) throw new DuplicateKeyError(handler.name)
+    this.handlers[handler.name] = handler
 
-  public addTextCommand<T extends TextCommand>(
-    ctor: TextCommandTypes.Constructor<T>
-  ): DiscordClientBuilder {
-    const command = new ctor(
-      this._configuration,
-      this._loggerFactory.createLogger()
-    )
-    if (this.textCommands[command.name])
-      throw new DuplicateKeyError(command.name)
-    this.textCommands[command.name] = command
-    return this
-  }
-
-  public addTextCommands<T extends TextCommand>(
-    ...ctors: TextCommandTypes.Constructor<T>[]
-  ): DiscordClientBuilder {
-    ctors.forEach(textCommand => this.addTextCommand(textCommand))
     return this
   }
 
@@ -87,8 +56,7 @@ export default class DiscordClientBuilder {
       this._loggerFactory.createLogger(),
       this._prismaClientFactory.createClient(),
       djsClient,
-      this.events,
-      this.textCommands
+      this.handlers
     )
   }
 }
