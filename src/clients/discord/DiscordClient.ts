@@ -16,14 +16,14 @@ export default class DiscordClient {
   protected readonly _configuration!: IConfiguration
 
   @Inject("loggerFactory")
-  protected readonly _loggerFactory!: ILoggerFactory
+  private readonly _loggerFactory!: ILoggerFactory
   protected readonly _logger: ILogger
 
   @Inject("prismaClientFactory")
-  protected readonly _prismaClientFactory!: PrismaClientFactory
+  private readonly _prismaClientFactory!: PrismaClientFactory
   protected readonly _prismaClient: PrismaClient
 
-  private readonly _djsClient: DjsClient<true>
+  protected readonly _djsClient: DjsClient<true>
 
   public constructor(djsClient: DjsClient, handlers: HandlerTypes.Collection) {
     // Setup dependencies
@@ -46,8 +46,14 @@ export default class DiscordClient {
       // Setup events
       if (handler.isEventHandler()) {
         this._djsClient[handler.event.occurrance](
-          handler.event.name,
-          async (...args: any[]) => await new handler.event().run(...args)
+          handler.event.type,
+          async (...args: any[]) => {
+            this._logger.log(
+              "DEBUG",
+              `Handling ${handler.event.type} event in ${name}...`
+            )
+            await new handler.event().run(...args)
+          }
         )
 
         types.push("Event: " + handler.event.type)
@@ -91,8 +97,10 @@ export default class DiscordClient {
       if (
         args[0].startsWith("!") &&
         Object.keys(textCommands).includes(command)
-      )
+      ) {
+        this._logger.log("DEBUG", `Running command ${command}...`)
         await new textCommands[command].text().run(message, ...args.slice(1))
+      }
     })
 
     // Create event to handle interactions
@@ -103,42 +111,61 @@ export default class DiscordClient {
           interaction.isChatInputCommand() &&
           handler.isSlashCommandHandler() &&
           interaction.commandName == handler.slash.name
-        )
+        ) {
+          this._logger.log(
+            "DEBUG",
+            `Handling slash command ${handler.slash.name}...`
+          )
           return new handler.slash().run(interaction)
-        else if (
+        } else if (
           interaction.isButton() &&
           handler.isButtonHandler() &&
           interaction.customId == handler.button.name
-        )
+        ) {
+          this._logger.log("DEBUG", `Handling button ${handler.button.name}...`)
           return new handler.button().run(interaction)
-        else if (
+        } else if (
           interaction.isAnySelectMenu() &&
           handler.isSelectMenuHandler() &&
           interaction.customId == handler.select.name
-        )
+        ) {
+          this._logger.log(
+            "DEBUG",
+            `Handling select menu ${handler.select.name}...`
+          )
           return new handler.select().run(interaction)
-        else if (
+        } else if (
           interaction.isUserContextMenuCommand() &&
           handler.isUserContextHandler() &&
           interaction.commandName == handler.user.name
-        )
+        ) {
+          this._logger.log(
+            "DEBUG",
+            `Handling user context ${handler.user.name}...`
+          )
           return new handler.user().run(interaction)
-        else if (
+        } else if (
           interaction.isMessageContextMenuCommand() &&
           handler.isMessageContextHandler() &&
           interaction.commandName == handler.message.name
-        )
+        ) {
+          this._logger.log(
+            "DEBUG",
+            `Handling message context ${handler.message.name}...`
+          )
           return new handler.message().run(interaction)
-        else if (
+        } else if (
           interaction.isModalSubmit() &&
           handler.isModalHandler() &&
           interaction.customId == handler.modal.name
-        )
+        ) {
+          this._logger.log("DEBUG", `Handling modal ${handler.modal.name}...`)
           return new handler.modal().run(interaction)
-      }
+        }
 
-      // If no interaction was run throw an error
-      throw new InteractionNotHandledError(interaction.id)
+        // If no interaction was run throw an error
+        throw new InteractionNotHandledError(interaction.id)
+      }
     })
   }
 

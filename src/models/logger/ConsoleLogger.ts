@@ -1,7 +1,12 @@
+import Inject from "../../decorators/di/Inject"
 import { ILoggerTypes } from "../../types/ILoggerTypes"
+import IConfiguration from "../configuration/IConfiguration"
 import ILogger from "./ILogger"
 
 export default class ConsoleLogger implements ILogger {
+  @Inject("configuration")
+  protected readonly _configuration!: IConfiguration
+
   public log(level: ILoggerTypes.LogLevel, message: string): void {
     const metadata = `[${new Date().toISOString()}] (${level}) `
     const newline =
@@ -23,7 +28,7 @@ export default class ConsoleLogger implements ILogger {
         console.error(content)
         break
       case "DEBUG":
-        console.log(content)
+        if (this._configuration.get("debug") === "true") console.log(content)
         break
     }
   }
