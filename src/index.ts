@@ -6,23 +6,24 @@ import ConsoleLoggerFactory from "./factories/logger/ConsoleLoggerFactory"
 import MessageDeleteLogger from "./handlers/MessageDeleteLogger"
 import MessageUpdateLogger from "./handlers/MessageUpdateLogger"
 import PingCommand from "./handlers/PingCommand"
+import Container from "./models/di/Container"
 
 // Setup dependencies
-const configuration = new ConfigurationBuilder()
-  .loadDotEnv("DISCORD_BOT_TOKEN")
-  .loadJson("config.json")
-  .build()
+const services = Container.getInstance()
 
-const loggerFactory = new ConsoleLoggerFactory()
+services.register("configuration", () =>
+  new ConfigurationBuilder()
+    .loadDotEnv("DISCORD_BOT_TOKEN")
+    .loadJson("config.json")
+    .build()
+)
 
-const prismaClientFactory = new PrismaClientFactory()
+services.register("loggerFactory", () => new ConsoleLoggerFactory())
+
+services.register("prismaClientFactory", () => new PrismaClientFactory())
 
 // Create client and configure events
-const client = new DiscordClientBuilder(
-  configuration,
-  loggerFactory,
-  prismaClientFactory
-)
+const client = new DiscordClientBuilder()
   .useGatewayIntentBits(
     GatewayIntentBits.GuildModeration,
     GatewayIntentBits.GuildMessages,
