@@ -8,6 +8,8 @@ import Inject from "../../decorators/di/Inject"
 import ILoggerFactory from "../../factories/logger/ILoggerFactory"
 import PrismaClientFactory from "../../factories/database/PrismaClientFactory"
 import { ITextCommandHandler } from "../../models/handlers/TextCommand"
+import { IDiscordHandler } from "../../models/handlers/DiscordHandler"
+import InteractionNotHandledError from "../../errors/InteractionNotHandledError"
 
 export default class DiscordClient {
   @Inject("configuration")
@@ -36,6 +38,7 @@ export default class DiscordClient {
 
     // Setup handlers
     const textCommands: Record<string, ITextCommandHandler> = {}
+    const interactions: IDiscordHandler[] = []
 
     Object.entries(handlers).forEach(([name, handler]) => {
       const types: string[] = []
@@ -47,52 +50,33 @@ export default class DiscordClient {
           async (...args: any[]) => await new handler.event().run(...args)
         )
 
-        types.push("Event: " + handler.event.name)
+        types.push("Event: " + handler.event.type)
       }
 
+      // Setup text commands
       if (handler.isTextCommandHandler()) {
         if (textCommands[handler.text.trigger])
           throw new DuplicateKeyError(name)
         textCommands[handler.text.trigger] = handler
 
-        types.push("Text Command")
+        types.push("Text command: " + handler.text.trigger)
       }
 
-      // if (handler.isSlashCommandHandler()) {
-      //   // TODO
+      // Setup interactions
+      if (handler.isInteractionHandler()) {
+        interactions.push(handler)
 
-      //   types.push("Slash Command")
-      // }
-
-      // if (handler.isButtonHandler()) {
-      //   // TODO
-
-      //   types.push("Button")
-      // }
-
-      // if (handler.isSelectMenuHandler()) {
-      //   // TODO
-
-      //   types.push("Select Menu")
-      // }
-
-      // if (handler.isUserContextHandler()) {
-      //   // TODO
-
-      //   types.push("User Context")
-      // }
-
-      // if (handler.isMessageContextHandler()) {
-      //   // TODO
-
-      //   types.push("Message Context")
-      // }
-
-      // if (handler.isModalHandler()) {
-      //   // TODO
-
-      //   types.push("Modal")
-      // }
+        if (handler.isSlashCommandHandler())
+          types.push("Slash command: " + handler.slash.name)
+        else if (handler.isButtonHandler())
+          types.push("Button: " + handler.button.name)
+        else if (handler.isSelectMenuHandler())
+          types.push("Select menu: " + handler.select.name)
+        else if (handler.isUserContextHandler())
+          types.push("User context: " + handler.user.name)
+        else if (handler.isMessageContextHandler())
+          types.push("Message context: " + handler.message.name)
+      }
 
       // Log configured handlers
       const list = ["", ...types.map(type => `- ${type}`)].join("\r\n")
@@ -109,6 +93,52 @@ export default class DiscordClient {
         Object.keys(textCommands).includes(command)
       )
         await new textCommands[command].text().run(message, ...args.slice(1))
+    })
+
+    // Create event to handle interactions
+    this._djsClient.on("interactionCreate", async interaction => {
+      // Test all different types of interaction
+      for (const handler of interactions) {
+        if (
+          interaction.isChatInputCommand() &&
+          handler.isSlashCommandHandler() &&
+          interaction.commandName == handler.slash.name
+        )
+          return new handler.slash().run(interaction)
+        else if (
+          interaction.isButton() &&
+          handler.isButtonHandler() &&
+          interaction.customId == handler.button.name
+        )
+          return new handler.button().run(interaction)
+        else if (
+          interaction.isAnySelectMenu() &&
+          handler.isSelectMenuHandler() &&
+          interaction.customId == handler.select.name
+        )
+          return new handler.select().run(interaction)
+        else if (
+          interaction.isUserContextMenuCommand() &&
+          handler.isUserContextHandler() &&
+          interaction.commandName == handler.user.name
+        )
+          return new handler.user().run(interaction)
+        else if (
+          interaction.isMessageContextMenuCommand() &&
+          handler.isMessageContextHandler() &&
+          interaction.commandName == handler.message.name
+        )
+          return new handler.message().run(interaction)
+        else if (
+          interaction.isModalSubmit() &&
+          handler.isModalHandler() &&
+          interaction.customId == handler.modal.name
+        )
+          return new handler.modal().run(interaction)
+      }
+
+      // If no interaction was run throw an error
+      throw new InteractionNotHandledError(interaction.id)
     })
   }
 

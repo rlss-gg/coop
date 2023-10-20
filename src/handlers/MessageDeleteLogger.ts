@@ -10,7 +10,7 @@ export default class MessageDeleteLogger
   extends DiscordHandler
   implements IEventHandler
 {
-  public readonly event = class extends Event("on", "messageDelete") {
+  public readonly event = class extends Event(this, "on", "messageDelete") {
     public async run(message: Message): Promise<void> {
       if (message.author.bot) return
 

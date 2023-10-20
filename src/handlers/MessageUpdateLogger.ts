@@ -10,7 +10,7 @@ export default class MessageUpdateLogger
   extends DiscordHandler
   implements IEventHandler
 {
-  public readonly event = class extends Event("on", "messageUpdate") {
+  public readonly event = class extends Event(this, "on", "messageUpdate") {
     public async run(oldMessage: Message, newMessage: Message): Promise<void> {
       if (oldMessage.author.bot) return
 

@@ -8,7 +8,7 @@ export default class PingCommand
   extends DiscordHandler
   implements ITextCommandHandler
 {
-  public readonly text = class extends TextCommand("ping") {
+  public readonly text = class extends TextCommand(this, "ping") {
     public async run(message: Message, ...args: string[]): Promise<void> {
       await message.reply("Pinging...").then(msg => {
         const start = message.createdTimestamp

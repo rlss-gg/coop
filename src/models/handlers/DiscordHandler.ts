@@ -2,8 +2,14 @@ import Inject from "../../decorators/di/Inject"
 import PrismaClientFactory from "../../factories/database/PrismaClientFactory"
 import ILoggerFactory from "../../factories/logger/ILoggerFactory"
 import IConfiguration from "../configuration/IConfiguration"
+import { IButtonHandler } from "./Button"
 import { IEventHandler } from "./Event"
+import { IMessageContextHandler } from "./MessageContext"
+import { IModalHandler } from "./Modal"
+import { ISelectMenuHandler } from "./SelectMenu"
+import { ISlashCommandHandler } from "./SlashCommand"
 import { ITextCommandHandler } from "./TextCommand"
+import { IUserContextHandler } from "./UserContext"
 
 export interface IDiscordHandler {
   readonly name: string
@@ -12,17 +18,25 @@ export interface IDiscordHandler {
 
   isTextCommandHandler(): this is ITextCommandHandler
 
-  // isSlashCommandHandler(): this is ISlashCommandHandler
+  isInteractionHandler(): this is
+    | ISlashCommandHandler
+    | IButtonHandler
+    | ISelectMenuHandler
+    | IUserContextHandler
+    | IMessageContextHandler
+    | IModalHandler
 
-  // isButtonHandler(): this is IButtonHandler
+  isSlashCommandHandler(): this is ISlashCommandHandler
 
-  // isSelectMenuHandler(): this is ISelectMenuHandler
+  isButtonHandler(): this is IButtonHandler
 
-  // isUserContextHandler(): this is IUserContextHandler
+  isSelectMenuHandler(): this is ISelectMenuHandler
 
-  // isMessageContextHandler(): this is IMessageContextHandler
+  isUserContextHandler(): this is IUserContextHandler
 
-  // isModalHandler(): this is IModalHandler
+  isMessageContextHandler(): this is IMessageContextHandler
+
+  isModalHandler(): this is IModalHandler
 }
 
 export default abstract class DiscordHandler implements IDiscordHandler {
@@ -47,27 +61,44 @@ export default abstract class DiscordHandler implements IDiscordHandler {
     return "text" in this
   }
 
-  // public isSlashCommandHandler(): this is ISlashCommandHandler {
-  //   return "slash" in this
-  // }
+  public isInteractionHandler(): this is
+    | ISlashCommandHandler
+    | IButtonHandler
+    | ISelectMenuHandler
+    | IUserContextHandler
+    | IMessageContextHandler
+    | IModalHandler {
+    return (
+      this.isSlashCommandHandler() ||
+      this.isButtonHandler() ||
+      this.isSelectMenuHandler() ||
+      this.isUserContextHandler() ||
+      this.isMessageContextHandler() ||
+      this.isModalHandler()
+    )
+  }
 
-  // public isButtonHandler(): this is IButtonHandler {
-  //   return "button" in this
-  // }
+  public isSlashCommandHandler(): this is ISlashCommandHandler {
+    return "slash" in this
+  }
 
-  // public isSelectMenuHandler(): this is ISelectMenuHandler {
-  //   return "select" in this
-  // }
+  public isButtonHandler(): this is IButtonHandler {
+    return "button" in this
+  }
 
-  // public isUserContextHandler(): this is IUserContextHandler {
-  //   return "user" in this
-  // }
+  public isSelectMenuHandler(): this is ISelectMenuHandler {
+    return "select" in this
+  }
 
-  // public isMessageContextHandler(): this is IMessageContextHandler {
-  //   return "message" in this
-  // }
+  public isUserContextHandler(): this is IUserContextHandler {
+    return "user" in this
+  }
 
-  // public isModalHandler(): this is IModalHandler {
-  //   return "modal" in this
-  // }
+  public isMessageContextHandler(): this is IMessageContextHandler {
+    return "message" in this
+  }
+
+  public isModalHandler(): this is IModalHandler {
+    return "modal" in this
+  }
 }
