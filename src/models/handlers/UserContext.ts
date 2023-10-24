@@ -15,7 +15,7 @@ export type UserContextConstructor<
 export interface IUserContextHandler<
   T extends IDiscordHandler = IDiscordHandler
 > {
-  user: UserContextConstructor<T>
+  contextUser: UserContextConstructor<T>
 }
 
 export abstract class BaseUserContext<

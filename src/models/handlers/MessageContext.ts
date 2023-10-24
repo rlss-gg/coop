@@ -15,7 +15,7 @@ export type MessageContextConstructor<
 export interface IMessageContextHandler<
   T extends IDiscordHandler = IDiscordHandler
 > {
-  message: MessageContextConstructor<T>
+  contextMessage: MessageContextConstructor<T>
 }
 
 export abstract class BaseMessageContext<

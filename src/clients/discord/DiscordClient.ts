@@ -76,12 +76,24 @@ export default class DiscordClient {
           types.push("Slash command: " + handler.slash.name)
         else if (handler.isButtonHandler())
           types.push("Button: " + handler.button.name)
-        else if (handler.isSelectMenuHandler())
-          types.push("Select menu: " + handler.select.name)
+        else if (handler.isStringSelectMenuHandler())
+          types.push("String select menu: " + handler.selectString.name)
+        else if (handler.isChannelSelectMenuHandler())
+          types.push("Channel select menu: " + handler.selectChannel.name)
+        else if (handler.isUserSelectMenuHandler())
+          types.push("User select menu: " + handler.selectUser.name)
+        else if (handler.isRoleSelectMenuHandler())
+          types.push("Role select menu: " + handler.selectRole.name)
+        else if (handler.isMentionableSelectMenuHandler())
+          types.push(
+            "Mentionable select menu: " + handler.selectMentionable.name
+          )
         else if (handler.isUserContextHandler())
-          types.push("User context: " + handler.user.name)
+          types.push("User context: " + handler.contextUser.name)
         else if (handler.isMessageContextHandler())
-          types.push("Message context: " + handler.message.name)
+          types.push("Message context: " + handler.contextMessage.name)
+        else if (handler.isModalHandler())
+          types.push("Modal: " + handler.modal.name)
       }
 
       // Log configured handlers
@@ -125,35 +137,75 @@ export default class DiscordClient {
           this._logger.log("DEBUG", `Handling button ${handler.button.name}...`)
           return new handler.button().run(interaction)
         } else if (
-          interaction.isAnySelectMenu() &&
-          handler.isSelectMenuHandler() &&
-          interaction.customId == handler.select.name
+          interaction.isStringSelectMenu() &&
+          handler.isStringSelectMenuHandler() &&
+          interaction.customId == handler.selectString.name
         ) {
           this._logger.log(
             "DEBUG",
-            `Handling select menu ${handler.select.name}...`
+            `Handling string select menu ${handler.selectString.name}...`
           )
-          return new handler.select().run(interaction)
+          return new handler.selectString().run(interaction)
+        } else if (
+          interaction.isChannelSelectMenu() &&
+          handler.isChannelSelectMenuHandler() &&
+          interaction.customId == handler.selectChannel.name
+        ) {
+          this._logger.log(
+            "DEBUG",
+            `Handling channel select menu ${handler.selectChannel.name}...`
+          )
+          return new handler.selectChannel().run(interaction)
+        } else if (
+          interaction.isUserSelectMenu() &&
+          handler.isUserSelectMenuHandler() &&
+          interaction.customId == handler.selectUser.name
+        ) {
+          this._logger.log(
+            "DEBUG",
+            `Handling user select menu ${handler.selectUser.name}...`
+          )
+          return new handler.selectUser().run(interaction)
+        } else if (
+          interaction.isRoleSelectMenu() &&
+          handler.isRoleSelectMenuHandler() &&
+          interaction.customId == handler.selectRole.name
+        ) {
+          this._logger.log(
+            "DEBUG",
+            `Handling role select menu ${handler.selectRole.name}...`
+          )
+          return new handler.selectRole().run(interaction)
+        } else if (
+          interaction.isMentionableSelectMenu() &&
+          handler.isMentionableSelectMenuHandler() &&
+          interaction.customId == handler.selectMentionable.name
+        ) {
+          this._logger.log(
+            "DEBUG",
+            `Handling mentionable select menu ${handler.selectMentionable.name}...`
+          )
+          return new handler.selectMentionable().run(interaction)
         } else if (
           interaction.isUserContextMenuCommand() &&
           handler.isUserContextHandler() &&
-          interaction.commandName == handler.user.name
+          interaction.commandName == handler.contextUser.name
         ) {
           this._logger.log(
             "DEBUG",
-            `Handling user context ${handler.user.name}...`
+            `Handling user context ${handler.contextUser.name}...`
           )
-          return new handler.user().run(interaction)
+          return new handler.contextUser().run(interaction)
         } else if (
           interaction.isMessageContextMenuCommand() &&
           handler.isMessageContextHandler() &&
-          interaction.commandName == handler.message.name
+          interaction.commandName == handler.contextMessage.name
         ) {
           this._logger.log(
             "DEBUG",
-            `Handling message context ${handler.message.name}...`
+            `Handling message context ${handler.contextMessage.name}...`
           )
-          return new handler.message().run(interaction)
+          return new handler.contextMessage().run(interaction)
         } else if (
           interaction.isModalSubmit() &&
           handler.isModalHandler() &&

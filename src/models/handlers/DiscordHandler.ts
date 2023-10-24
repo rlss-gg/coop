@@ -3,13 +3,17 @@ import PrismaClientFactory from "../../factories/database/PrismaClientFactory"
 import ILoggerFactory from "../../factories/logger/ILoggerFactory"
 import IConfiguration from "../configuration/IConfiguration"
 import { IButtonHandler } from "./Button"
+import { IChannelSelectMenuHandler } from "./ChannelSelectMenu"
 import { IEventHandler } from "./Event"
+import { IMentionableSelectMenuHandler } from "./MentionableSelectMenu"
 import { IMessageContextHandler } from "./MessageContext"
 import { IModalHandler } from "./Modal"
-import { ISelectMenuHandler } from "./SelectMenu"
+import { IRoleSelectMenuHandler } from "./RoleSelectMenu"
 import { ISlashCommandHandler } from "./SlashCommand"
+import { IStringSelectMenuHandler } from "./StringSelectMenu"
 import { ITextCommandHandler } from "./TextCommand"
 import { IUserContextHandler } from "./UserContext"
+import { IUserSelectMenuHandler } from "./UserSelectMenu"
 
 export interface IDiscordHandler {
   readonly name: string
@@ -21,7 +25,11 @@ export interface IDiscordHandler {
   isInteractionHandler(): this is
     | ISlashCommandHandler
     | IButtonHandler
-    | ISelectMenuHandler
+    | IStringSelectMenuHandler
+    | IChannelSelectMenuHandler
+    | IUserSelectMenuHandler
+    | IRoleSelectMenuHandler
+    | IMentionableSelectMenuHandler
     | IUserContextHandler
     | IMessageContextHandler
     | IModalHandler
@@ -30,7 +38,22 @@ export interface IDiscordHandler {
 
   isButtonHandler(): this is IButtonHandler
 
-  isSelectMenuHandler(): this is ISelectMenuHandler
+  isSelectMenuHandler(): this is
+    | IStringSelectMenuHandler
+    | IChannelSelectMenuHandler
+    | IUserSelectMenuHandler
+    | IRoleSelectMenuHandler
+    | IMentionableSelectMenuHandler
+
+  isStringSelectMenuHandler(): this is IStringSelectMenuHandler
+
+  isChannelSelectMenuHandler(): this is IChannelSelectMenuHandler
+
+  isUserSelectMenuHandler(): this is IUserSelectMenuHandler
+
+  isRoleSelectMenuHandler(): this is IRoleSelectMenuHandler
+
+  isMentionableSelectMenuHandler(): this is IMentionableSelectMenuHandler
 
   isUserContextHandler(): this is IUserContextHandler
 
@@ -64,14 +87,22 @@ export default abstract class DiscordHandler implements IDiscordHandler {
   public isInteractionHandler(): this is
     | ISlashCommandHandler
     | IButtonHandler
-    | ISelectMenuHandler
+    | IStringSelectMenuHandler
+    | IChannelSelectMenuHandler
+    | IUserSelectMenuHandler
+    | IRoleSelectMenuHandler
+    | IMentionableSelectMenuHandler
     | IUserContextHandler
     | IMessageContextHandler
     | IModalHandler {
     return (
       this.isSlashCommandHandler() ||
       this.isButtonHandler() ||
-      this.isSelectMenuHandler() ||
+      this.isStringSelectMenuHandler() ||
+      this.isChannelSelectMenuHandler() ||
+      this.isUserSelectMenuHandler() ||
+      this.isRoleSelectMenuHandler() ||
+      this.isMentionableSelectMenuHandler() ||
       this.isUserContextHandler() ||
       this.isMessageContextHandler() ||
       this.isModalHandler()
@@ -86,16 +117,53 @@ export default abstract class DiscordHandler implements IDiscordHandler {
     return "button" in this
   }
 
-  public isSelectMenuHandler(): this is ISelectMenuHandler {
-    return "select" in this
+  public isSelectMenuHandler(): this is
+    | IStringSelectMenuHandler
+    | IChannelSelectMenuHandler
+    | IUserSelectMenuHandler
+    | IRoleSelectMenuHandler
+    | IMentionableSelectMenuHandler {
+    return (
+      this.isStringSelectMenuHandler() ||
+      this.isChannelSelectMenuHandler() ||
+      this.isUserSelectMenuHandler() ||
+      this.isRoleSelectMenuHandler() ||
+      this.isMentionableSelectMenuHandler()
+    )
+  }
+
+  public isStringSelectMenuHandler(): this is IStringSelectMenuHandler {
+    return "selectString" in this
+  }
+
+  public isChannelSelectMenuHandler(): this is IChannelSelectMenuHandler {
+    return "selectChannel" in this
+  }
+
+  public isUserSelectMenuHandler(): this is IUserSelectMenuHandler {
+    return "selectUser" in this
+  }
+
+  public isRoleSelectMenuHandler(): this is IRoleSelectMenuHandler {
+    return "selectRole" in this
+  }
+
+  public isMentionableSelectMenuHandler(): this is IMentionableSelectMenuHandler {
+    return "selectMentionable" in this
+  }
+
+  public isContextHandler(): this is
+    | IUserContextHandler
+    | IMessageContextHandler {
+    return this.isUserContextHandler() || this.isMessageContextHandler()
   }
 
   public isUserContextHandler(): this is IUserContextHandler {
-    return "user" in this
+    return "contextUser" in this
   }
 
   public isMessageContextHandler(): this is IMessageContextHandler {
-    return "message" in this
+    return "contextMessage" in this
   }
 
   public isModalHandler(): this is IModalHandler {
